@@ -5,10 +5,18 @@ from scripts.bd import lista_vantagens_desvantagens
 
 
 def organiza_resposta(status, dict_escolha_pokemon, i, dados=None):
+    ''' Organiza a resposta da API
+    
+    :param status: código de status da requisição
+    :param dict_escolha_pokemon: dicionário com os pokémons escolhidos
+    :param i: índice do pokémon (1 ou 2)
+    :param dados: dados a serem retornados (opcional)
+    :return: resposta formatada em JSON'''
+
     if dados is None:
         dados = []
 
-    # trata a mensagem conforme o status
+    # tratar a mensagem conforme o status
     if status == 200:
         mensagem = 'Sucesso'
     elif status == 400:
@@ -16,6 +24,7 @@ def organiza_resposta(status, dict_escolha_pokemon, i, dados=None):
     else:
         mensagem = 'Erro ao consultar API oficial do Pokémon'
 
+    # formatar a resposta
     return make_response(
         jsonify({
             'Status': status,
@@ -33,7 +42,10 @@ app.json.sort_keys = False
 
 @app.route('/infos_pokemon', methods=['GET'])
 def consultar_pokemon():
+    '''Rota para consultar as informações dos pokémons escolhidos.
     
+    :return: resposta formatada em JSON'''
+
     dict_escolha_pokemon = request.get_json()
 
     response_json = []
@@ -43,6 +55,7 @@ def consultar_pokemon():
         if not str(dict_escolha_pokemon[f'pokemon{i}']).isdigit() or not 1 <= int(dict_escolha_pokemon[f'pokemon{i}']) <= 1025:
             return organiza_resposta(400, dict_escolha_pokemon, i)
 
+        # consultar a API oficial do Pokémon
         url = f"https://pokeapi.co/api/v2/pokemon/{dict_escolha_pokemon[f'pokemon{i}']}"
 
         response = requests.get(url)
@@ -63,17 +76,23 @@ def consultar_pokemon():
             "tipo": tipo
         })
 
+    # formatar a resposta
     return organiza_resposta(200, dict_escolha_pokemon, i, response_json)
 
 
 @app.route('/battle', methods=['POST'])
 def batalhar():
+    '''Rota para simular a batalha entre os pokémons.
+
+    :return: resposta formatada em JSON'''
+
     dict_infos_pokemon = request.get_json()
 
     tipo_pokemon1 = dict_infos_pokemon['Data'][0]['tipo'].capitalize()
     tipo_pokemon2 = dict_infos_pokemon['Data'][1]['tipo'].capitalize()
 
-    # definir o vencedor
+
+    # definir o vencedor conforme as vantagens/desvantagens
     vantagem1 = False
     vantagem2 = False
 
@@ -86,12 +105,10 @@ def batalhar():
         vencedor_tipo = tipo_pokemon1
         vencedor_nome = dict_infos_pokemon["Data"][0]["nome"].capitalize()
         perdedor_tipo = tipo_pokemon2
-
     elif vantagem2 is True and vantagem1 is False:
         vencedor_tipo = tipo_pokemon2
         vencedor_nome = dict_infos_pokemon["Data"][1]["nome"].capitalize()
         perdedor_tipo = tipo_pokemon1
-
     else:
         vencedor_nome = None
 
@@ -107,6 +124,7 @@ def batalhar():
         "results": resultado
     }
 
+    # formatar a resposta
     return make_response(jsonify(dict_resultado_batalha), 200)
     
 
