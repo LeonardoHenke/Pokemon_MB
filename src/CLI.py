@@ -124,6 +124,12 @@ if __name__ == "__main__":
         dict_escolha_pokemon = tela_escolher_pokemon()
 
         dict_infos_pokemon = consultar_pokemon(dict_escolha_pokemon)
+        if dict_infos_pokemon is None:
+            for i in range(10, 0, -1):
+                limpar_terminal("linha", 1)
+                print(f'Reiniciando em {i} segundos...')
+                sleep(1)
+            continue
 
         escolha_usuario = tela_confirmar_escolhas(dict_infos_pokemon)
         if escolha_usuario == '2':

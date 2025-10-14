@@ -9,9 +9,22 @@ def consultar_pokemon(dict_escolha_pokemon):
 
     url = 'http://127.0.0.1:5000/infos_pokemon'
     
-    response = requests.get(url, json=dict_escolha_pokemon)
+    try:
+        response = requests.get(url, json=dict_escolha_pokemon, timeout=10)
 
-    # TODO: tratar erros
+        # verificar se a resposta é válida
+        response.raise_for_status()
+        return response.json()
+    
+    # tratar erros de requisição
+    except requests.exceptions.ConnectionError as e:
+        print(f"Erro de conexão: {e}\nVerificar se o servidor Flask está ligado")
+    except requests.exceptions.Timeout as e:
+        print(f"Erro de timeout: {e}\nO servidor demorou muito para responder")
+    except requests.exceptions.HTTPError as e:
+        print(f"Erro HTTP: {e}")
+    except requests.exceptions.RequestException as e:
+        print(f"Erro na requisição: {e}")
 
-    return response.json()
+    return None
 
