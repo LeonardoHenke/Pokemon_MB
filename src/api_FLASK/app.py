@@ -19,8 +19,12 @@ def organiza_resposta(status, dict_escolha_pokemon, i, dados=None):
     # tratar a mensagem conforme o status
     if status == 200:
         mensagem = 'Sucesso'
-    elif status == 400:
+    elif status == 422:
         mensagem = f'[{dict_escolha_pokemon[f"pokemon{i}"]}] não é válido'
+    elif status == 503:
+        mensagem = 'Erro de conexão ao consultar API oficial do Pokémon'
+    elif status == 504:
+        mensagem = 'Timeout ao consultar API oficial do Pokémon'
     else:
         mensagem = 'Erro ao consultar API oficial do Pokémon'
 
@@ -50,33 +54,45 @@ def consultar_pokemon():
 
     response_json = []
     for i in range(1, 3):
+        status_code = 200
         
         # verificar se o id é válido
         if not str(dict_escolha_pokemon[f'pokemon{i}']).isdigit() or not 1 <= int(dict_escolha_pokemon[f'pokemon{i}']) <= 1025:
-            return organiza_resposta(400, dict_escolha_pokemon, i)
+            return organiza_resposta(422, dict_escolha_pokemon, i)
 
         # consultar a API oficial do Pokémon
         url = f"https://pokeapi.co/api/v2/pokemon/{dict_escolha_pokemon[f'pokemon{i}']}"
 
-        response = requests.get(url)
+        try:
+            response = requests.get(url, timeout=5)
+            response.raise_for_status()
 
-        if response.status_code != 200:
-            return organiza_resposta(response.status_code, dict_escolha_pokemon, i)
+            response = response.json()
 
-        response = response.json()
+            # definir os dados que serão retornados
+            id_pokemon = response['id']
+            nome = response['name']
+            tipo = response['types'][0]['type']['name']
 
-        # definir os dados que serão retornados
-        id_pokemon = response['id']
-        nome = response['name']
-        tipo = response['types'][0]['type']['name']
+            response_json.append({
+                "id": id_pokemon,
+                "nome": nome,
+                "tipo": tipo
+            })
 
-        response_json.append({
-            "id": id_pokemon,
-            "nome": nome,
-            "tipo": tipo
-        })
+        # tratar erros de requisição
+        except requests.exceptions.ConnectionError:
+            status_code = 503
+        except requests.exceptions.Timeout:
+            status_code = 504
+        except requests.exceptions.HTTPError:
+            status_code = response.status_code
+        except requests.exceptions.RequestException:
+            status_code = 500
 
-    # formatar a resposta
+        if status_code != 200:
+            return organiza_resposta(status_code, dict_escolha_pokemon, i)
+
     return organiza_resposta(200, dict_escolha_pokemon, i, response_json)
 
 
@@ -88,8 +104,18 @@ def batalhar():
 
     dict_infos_pokemon = request.get_json()
 
-    tipo_pokemon1 = dict_infos_pokemon['Data'][0]['tipo'].capitalize()
-    tipo_pokemon2 = dict_infos_pokemon['Data'][1]['tipo'].capitalize()
+
+    try:
+        tipo_pokemon1 = dict_infos_pokemon['Data'][0]['tipo'].capitalize()
+        tipo_pokemon2 = dict_infos_pokemon['Data'][1]['tipo'].capitalize()
+        nome_pokemon1 = dict_infos_pokemon['Data'][0]['nome'].capitalize()
+        nome_pokemon2 = dict_infos_pokemon['Data'][1]['nome'].capitalize()
+    except (KeyError, IndexError) as e:
+        return make_response(jsonify({
+            "Status": 400,
+            "StatusMessage": f"Erro nos dados recebidos: {str(e)}",
+            "Data": []
+        }), 400)
 
 
     # definir o vencedor conforme as vantagens/desvantagens
@@ -103,11 +129,11 @@ def batalhar():
 
     if vantagem1 is True and vantagem2 is False:
         vencedor_tipo = tipo_pokemon1
-        vencedor_nome = dict_infos_pokemon["Data"][0]["nome"].capitalize()
+        vencedor_nome = nome_pokemon1
         perdedor_tipo = tipo_pokemon2
     elif vantagem2 is True and vantagem1 is False:
         vencedor_tipo = tipo_pokemon2
-        vencedor_nome = dict_infos_pokemon["Data"][1]["nome"].capitalize()
+        vencedor_nome = nome_pokemon2
         perdedor_tipo = tipo_pokemon1
     else:
         vencedor_nome = None
@@ -118,14 +144,18 @@ def batalhar():
         resultado = ['Nenhum dos tipos tem vantagem. Empate!']
         
 
+    # formatar a resposta
     dict_resultado_batalha = {
         "pokemon1": dict_infos_pokemon['Data'][0]['nome'].capitalize(),
         "pokemon2": dict_infos_pokemon['Data'][1]['nome'].capitalize(),
         "results": resultado
     }
 
-    # formatar a resposta
-    return make_response(jsonify(dict_resultado_batalha), 200)
+    return make_response(jsonify({
+        "Status": 200,
+        "StatusMessage": "Batalha concluída com sucesso.",
+        "Data": [dict_resultado_batalha]
+    }), 200)
     
 
 

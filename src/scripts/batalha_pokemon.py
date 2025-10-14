@@ -14,7 +14,7 @@ def batalhar(dict_infos_pokemon):
 
         # verificar se a resposta é válida
         response.raise_for_status()
-        return response.json()
+        return response.json()['Data'][0]
     
     # tratar erros de requisição
     except requests.exceptions.ConnectionError as e:
