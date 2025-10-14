@@ -5,7 +5,7 @@ def consultar_pokemon(dict_escolha_pokemon):
     '''Consulta as informações dos pokémons escolhidos na API Flask.
     
     :param dict_escolha_pokemon: dicionário com os ids dos pokémons escolhidos
-    :return: dicionário com as informações dos pokémons'''
+    :return: dicionário com as informações dos pokémons (id, nome e tipo) ou None em caso de erro'''
 
     url = 'http://127.0.0.1:5000/infos_pokemon'
     

@@ -116,6 +116,17 @@ def tela_resultado_batalha(dict_resultado_batalha):
         return escolha_usuario
 
 
+def reiniciar_programa(segundos):
+    '''Reinicia o programa após uma contagem regressiva.
+    
+    :param segundos: número de segundos para a contagem regressiva'''
+
+    for i in range(segundos, 0, -1):
+        limpar_terminal("linha", 1)
+        print(f'Reiniciando em {i} segundos...')
+        sleep(1)
+
+
 if __name__ == "__main__":
     # loop principal
     while True:
@@ -125,10 +136,7 @@ if __name__ == "__main__":
 
         dict_infos_pokemon = consultar_pokemon(dict_escolha_pokemon)
         if dict_infos_pokemon is None:
-            for i in range(10, 0, -1):
-                limpar_terminal("linha", 1)
-                print(f'Reiniciando em {i} segundos...')
-                sleep(1)
+            reiniciar_programa(10)
             continue
 
         escolha_usuario = tela_confirmar_escolhas(dict_infos_pokemon)
@@ -136,6 +144,9 @@ if __name__ == "__main__":
             continue
 
         dict_resultado_batalha = batalhar(dict_infos_pokemon)
+        if dict_resultado_batalha is None:
+            reiniciar_programa(10)
+            continue
 
         escolha_usuario = tela_resultado_batalha(dict_resultado_batalha)
         if escolha_usuario == '1':

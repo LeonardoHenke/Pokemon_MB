@@ -33,6 +33,7 @@ app.json.sort_keys = False
 
 @app.route('/infos_pokemon', methods=['GET'])
 def consultar_pokemon():
+    
     dict_escolha_pokemon = request.get_json()
 
     response_json = []
