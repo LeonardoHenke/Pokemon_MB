@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, make_response
 import requests
+from scripts.bd import lista_vantagens_desvantagens
 
 
 
@@ -25,6 +26,7 @@ def organiza_resposta(status, dict_escolha_pokemon, i, dados=None):
     )
 
 
+# inicializa o Flask
 app = Flask(__name__)
 app.json.sort_keys = False
 
@@ -65,7 +67,49 @@ def consultar_pokemon():
 
 @app.route('/battle', methods=['POST'])
 def batalhar():
-    return 
+    dict_infos_pokemon = request.get_json()
+
+    tipo_pokemon1 = dict_infos_pokemon['Data'][0]['tipo'].capitalize()
+    tipo_pokemon2 = dict_infos_pokemon['Data'][1]['tipo'].capitalize()
+
+    # definir o vencedor
+    vantagem1 = False
+    vantagem2 = False
+
+    if tipo_pokemon2 in lista_vantagens_desvantagens[tipo_pokemon1]['strong_against']:
+        vantagem1 = True
+    if tipo_pokemon1 in lista_vantagens_desvantagens[tipo_pokemon2]['strong_against']:
+        vantagem2 = True
+
+    if vantagem1 is True and vantagem2 is False:
+        vencedor_tipo = tipo_pokemon1
+        vencedor_nome = dict_infos_pokemon["Data"][0]["nome"].capitalize()
+        perdedor_tipo = tipo_pokemon2
+
+    elif vantagem2 is True and vantagem1 is False:
+        vencedor_tipo = tipo_pokemon2
+        vencedor_nome = dict_infos_pokemon["Data"][1]["nome"].capitalize()
+        perdedor_tipo = tipo_pokemon1
+
+    else:
+        vencedor_nome = None
+
+    if vencedor_nome is not None:
+        resultado = [f'{vencedor_tipo.capitalize()} tem vantagem sobre {perdedor_tipo.capitalize()}. {vencedor_nome} vence!']
+    else:
+        resultado = ['Nenhum dos tipos tem vantagem. Empate!']
+        
+
+    dict_resultado_batalha = {
+        "pokemon1": dict_infos_pokemon['Data'][0]['nome'].capitalize(),
+        "pokemon2": dict_infos_pokemon['Data'][1]['nome'].capitalize(),
+        "results": resultado
+    }
+
+    return make_response(jsonify(dict_resultado_batalha), 200)
+    
 
 
+if __name__ == '__main__':
+    app.run()
 
