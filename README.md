@@ -1,6 +1,6 @@
 # Simulador de Batalhas Pokémon
 
-Este projeto consiste em um simulador de batalhas Pokémon, desenvolvido para fins de entrevista técnica. O sistema é composto por uma interface de linha de comando (CLI) e uma API Flask, integrando-se à PokeAPI para obtenção dos dados dos pokémons. O usuário pode selecionar dois pokémons, visualizar seus dados e realizar batalhas baseadas em vantagens de tipos.
+Este projeto consiste em um simulador de batalhas Pokémon, desenvolvido para fins de entrevista técnica. O sistema é composto por uma interface de linha de comando (CLI) e uma API Flask, que utiliza a PokeAPI para obtenção dos dados dos pokémons. O usuário pode selecionar dois pokémons, visualizar seus dados e realizar batalhas baseadas em vantagens de tipos.
 
 ---
 
@@ -111,7 +111,8 @@ Siga as instruções na tela para escolher os pokémons e realizar batalhas.
 
 - O projeto foi desenvolvido para fácil separação entre API e cliente CLI.
 - Todas as entradas são validadas para evitar erros e garantir boa experiência ao usuário.
-- As funções de integração com API possuem tratamento completo de exceções, promovendo robustez.
+- O projeto segue boas práticas de organização, documentação e de código limpo.
+- Teste unitários estão em desenvolvimento.
 
 ---
 
