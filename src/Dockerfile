@@ -8,7 +8,7 @@ WORKDIR /POKEMON_MB_CLI
 COPY . .
 
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r /API_POKEMON_MB/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install -e .
 
 EXPOSE 8000

@@ -3,8 +3,7 @@ services:
 
     # contêiner da API Flask
     pokemon_api:
-
-        # define o caminho do Dockerfile para construir a imagem da API Flask
+        # constroi a imagem da API Flask
         build:
             # define o path de origem da build
             context: .
@@ -19,23 +18,34 @@ services:
         ports:
             - 8000:8000
 
-        # define o nome do contêiner
+        # define o nome do contêiner/imagem
         container_name: pokemon_api_container
-
-        # define o nome da imagem
         image: pokemon_api_image
 
 
     # contêiner do CLI
     pokemon_cli:
-        # define o caminho do Dockerfile para construir a imagem do CLI
-        build: ./src/
+        # constroi a imagem do CLI
+        build:
+            # define o path de origem da build
+            context: .
+
+            # define o caminho do Dockerfile
+            dockerfile: src/Dockerfile
 
         # reinicia o contêiner automaticamente em caso de falha
         restart: always
 
-        # define que o contêiner do CLI depende do contêiner da API Flask
+        # garante que o CLI só comece depois da API (ordem de start)
         depends_on:
-            - api_FLASK
+            - pokemon_api
+
+        # necessário para permitir interação via input (stdin) e um TTY
+        stdin_open: true
+        tty: true
+
+        # define o nome do contêiner/imagem
+        container_name: pokemon_cli_container
+        image: pokemon_cli_image
 
 

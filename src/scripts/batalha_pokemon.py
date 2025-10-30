@@ -7,7 +7,7 @@ def batalhar(dict_infos_pokemon):
     :param dict_infos_pokemon: dicionário com as informações dos pokémons (id, nome e tipo)
     :return: dicionário com o resultado da batalha"""
 
-    url = 'http://127.0.0.1:5000/battle'
+    url = 'http://pokemon_api:8000/battle'
 
     try:
         response = requests.post(url, json=dict_infos_pokemon, timeout=10)

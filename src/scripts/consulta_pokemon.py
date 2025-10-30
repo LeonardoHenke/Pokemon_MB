@@ -7,7 +7,7 @@ def consultar_pokemon(dict_escolha_pokemon):
     :param dict_escolha_pokemon: dicionário com os ids dos pokémons escolhidos
     :return: dicionário com as informações dos pokémons (id, nome e tipo) ou None em caso de erro"""
 
-    url = 'http://127.0.0.1:5000/infos_pokemon'
+    url = 'http://pokemon_api:8000/infos_pokemon'
 
     try:
         response = requests.get(url, json=dict_escolha_pokemon, timeout=10)
